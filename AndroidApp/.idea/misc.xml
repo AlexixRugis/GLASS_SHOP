@@ -7,7 +7,9 @@
         <entry key="..\:/PythonProjects/GLASS_SHOP/AndroidApp/app/src/main/res/drawable/ic_home_black_24dp.xml" value="0.31875" />
         <entry key="..\:/PythonProjects/GLASS_SHOP/AndroidApp/app/src/main/res/drawable/ic_launcher_background.xml" value="0.31875" />
         <entry key="..\:/PythonProjects/GLASS_SHOP/AndroidApp/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/PythonProjects/GLASS_SHOP/AndroidApp/app/src/main/res/layout/catalog_glasses_model.xml" value="0.5" />
         <entry key="..\:/PythonProjects/GLASS_SHOP/AndroidApp/app/src/main/res/layout/fragment_account.xml" value="0.20885416666666667" />
+        <entry key="..\:/PythonProjects/GLASS_SHOP/AndroidApp/app/src/main/res/layout/fragment_cart.xml" value="0.20520833333333333" />
         <entry key="..\:/PythonProjects/GLASS_SHOP/AndroidApp/app/src/main/res/layout/fragment_catalog.xml" value="0.20885416666666667" />
         <entry key="..\:/PythonProjects/GLASS_SHOP/AndroidApp/app/src/main/res/layout/fragment_dashboard.xml" value="0.20885416666666667" />
         <entry key="..\:/PythonProjects/GLASS_SHOP/AndroidApp/app/src/main/res/menu/bottom_nav_menu.xml" value="0.20885416666666667" />
