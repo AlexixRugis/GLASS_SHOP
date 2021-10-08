@@ -3,6 +3,7 @@ package com.example.glassesshop.api;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.squareup.picasso.Picasso;
 
 public class HttpUtils {
     private static final String BASE_URL = "http://10.0.2.2:8000/api/v1/";

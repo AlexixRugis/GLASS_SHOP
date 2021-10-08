@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -26,6 +27,12 @@ public class CatalogFragment extends Fragment {
         final ListView listView = binding.catalogList;
         catalogViewModel.getData().observe(getViewLifecycleOwner(), (data) -> {
             listView.setAdapter(new GlassesModelAdapter(getContext(), data));
+        });
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+            }
         });
         return root;
     }
