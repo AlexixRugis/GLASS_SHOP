@@ -1,15 +1,5 @@
 from rest_framework import serializers
-from glasses.models import GlassesModel, GlassesVariant, GlassesForm, GlassesFrame, ExtraOption
-
-class GlassesVariantSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GlassesVariant
-        fields = '__all__'
-
-class GlassesVariantListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GlassesVariant
-        fields = ('pk', 'name', 'avatar')
+from glasses.models import GlassesModel, GlassesForm, GlassesFrame, ExtraOption
 
 class GlassesFrameSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,7 +18,6 @@ class ExtraOptionSerializer(serializers.ModelSerializer):
 
 
 class GlassesModelSerializer(serializers.ModelSerializer):
-    variants = GlassesVariantListSerializer(many = True)
     options = ExtraOptionSerializer(many = True)
 
     form = GlassesFormSerializer()
@@ -39,8 +28,6 @@ class GlassesModelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class GlassesModelListSerializer(serializers.ModelSerializer):
-    variants = GlassesVariantListSerializer(many = True)
-
     class Meta:
         model = GlassesModel
-        fields = ('pk', 'name', 'variants', 'cost', 'form', 'frame')
+        fields = ('pk', 'name', 'avatar', 'current_cost', 'form', 'frame')
