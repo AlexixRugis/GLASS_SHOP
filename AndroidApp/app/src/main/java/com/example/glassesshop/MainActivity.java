@@ -1,7 +1,9 @@
 package com.example.glassesshop;
 
+import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.glassesshop.ui.GlassesDetailActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +34,14 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+    }
+
+    public void GotoDetails(int pk) {
+        Intent intent = new Intent(this, GlassesDetailActivity.class);
+
+        intent.putExtra("pk", pk);
+
+        startActivity(intent);
     }
 
 }

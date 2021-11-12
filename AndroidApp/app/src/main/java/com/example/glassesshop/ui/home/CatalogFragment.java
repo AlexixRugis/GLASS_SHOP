@@ -1,6 +1,7 @@
 package com.example.glassesshop.ui.home;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,10 +9,18 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.library.baseAdapters.BR;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.glassesshop.R;
+import com.example.glassesshop.databinding.CatalogGlassesModelBinding;
 import com.example.glassesshop.databinding.FragmentCatalogBinding;
+import com.example.glassesshop.ui.DataBindingListAdapter;
+
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CatalogFragment extends Fragment {
 
@@ -25,15 +34,26 @@ public class CatalogFragment extends Fragment {
         View root = binding.getRoot();
 
         final ListView listView = binding.catalogList;
+
+        DataBindingListAdapter<GlassesModel, CatalogGlassesModelBinding> adapter =
+                new DataBindingListAdapter<>(getContext(), R.layout.catalog_glasses_model, BR.glasses, null);
+
+
         catalogViewModel.getData().observe(getViewLifecycleOwner(), (data) -> {
-            listView.setAdapter(new GlassesModelAdapter(getContext(), data));
+            Log.d("d", "data");
+            adapter.setDataList(data);
+            adapter.notifyDataSetChanged();
         });
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+                catalogViewModel.ShowDetails(i);
             }
         });
+
+        listView.setAdapter(adapter);
+
         return root;
     }
 

@@ -1,12 +1,13 @@
 package com.example.glassesshop.ui.home;
 
 public class GlassesModel {
-
+    private int pk;
     private String name;
     private String cost;
     private String preview_image;
 
-    public GlassesModel(String name, String cost, String preview_image) {
+    public GlassesModel(int pk, String name, String cost, String preview_image) {
+        this.pk = pk;
         this.name = name;
         this.cost = cost;
         this.preview_image = preview_image;
@@ -38,5 +39,13 @@ public class GlassesModel {
 
     public void setPreview_image(String preview_image) {
         this.preview_image = preview_image;
+    }
+
+    public int getPk() {
+        return pk;
+    }
+
+    public void setPk(int pk) {
+        this.pk = pk;
     }
 }

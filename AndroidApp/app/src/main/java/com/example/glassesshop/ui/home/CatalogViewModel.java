@@ -1,5 +1,7 @@
 package com.example.glassesshop.ui.home;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -24,7 +26,6 @@ public class CatalogViewModel extends ViewModel {
 
     public CatalogViewModel() {
         glassesData = new MutableLiveData<>();
-
         GlassesApiUtils.getAllGlasses(new IGlasseslist() {
             @Override
             public void OnGetGlasses(ArrayList<GlassesModel> glasses) {
@@ -35,5 +36,10 @@ public class CatalogViewModel extends ViewModel {
 
     public LiveData<ArrayList<GlassesModel>> getData() {
         return glassesData;
+    }
+
+    public void ShowDetails(int index) {
+        GlassesModel model = glassesData.getValue().get(index);
+        Log.d("", String.valueOf(model.getPk()));
     }
 }

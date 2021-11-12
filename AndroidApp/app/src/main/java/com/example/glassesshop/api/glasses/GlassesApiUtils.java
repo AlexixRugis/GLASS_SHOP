@@ -1,5 +1,7 @@
 package com.example.glassesshop.api.glasses;
 
+import android.util.Log;
+
 import com.example.glassesshop.api.HttpUtils;
 import com.example.glassesshop.ui.home.GlassesDetailModel;
 import com.example.glassesshop.ui.home.GlassesModel;
@@ -55,25 +57,18 @@ public class GlassesApiUtils {
                         JSONObject jsonModel = jsonArray.getJSONObject(i);
 
                         GlassesModel model = new GlassesModel(
+                                jsonModel.getInt("pk"),
                                 jsonModel.getString("name"),
-                                jsonModel.getString("cost"),
-                                ""
+                                jsonModel.getString("current_cost"),
+                                jsonModel.getString("avatar")
                         );
-
-                        JSONArray variants = jsonModel.getJSONArray("variants");
-                        System.out.println(variants.length());
-                        if (variants.length() > 0) {
-                            if (!variants.getJSONObject(0).isNull("avatar")) {
-                                model.setPreview_image(variants.getJSONObject(0).getString("avatar"));
-                                System.out.println(model.getPreview_image());
-                            }
-                        }
 
                         models.add(model);
                     }
-
+                    Log.d("", "dd");
                     glassesListHanler.OnGetGlasses(models);
-                } catch (JSONException ignored) {
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
         });
