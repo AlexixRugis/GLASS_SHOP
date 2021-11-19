@@ -65,8 +65,29 @@ public class GlassesApiUtils {
 
                         models.add(model);
                     }
-                    Log.d("", "dd");
                     glassesListHanler.OnGetGlasses(models);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public static void getGlassesDetail(int pk, IGlassesDetail glassesDetailHandler) {
+        HttpUtils.get(String.format("glasses/%d/", pk), null, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    GlassesDetailModel detailModel = new GlassesDetailModel();
+                    detailModel.setName(response.getString("name"));
+                    detailModel.setDescription(response.getString("description"));
+                    detailModel.setCost(response.getString("current_cost"));
+                    detailModel.setFormName(((JSONObject)response.get("form")).getString("name"));
+                    detailModel.setFrameName(((JSONObject)response.get("frame")).getString("name"));
+
+                    if (!response.isNull("avatar")) detailModel.setAvatar(response.getString("avatar"));
+
+                    glassesDetailHandler.onGetGlassesDetail(detailModel);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

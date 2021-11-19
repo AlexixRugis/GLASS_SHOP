@@ -18,8 +18,7 @@ public class GlassesDetailActivity extends AppCompatActivity {
 
         pk = getIntent().getIntExtra("pk", -1);
 
-        GlassesDetailViewModel viewModel = new ViewModelProvider(this).get(GlassesDetailViewModel.class);
-        viewModel.setPk(pk);
+        GlassesDetailViewModel viewModel = new ViewModelProvider(this, new GlassesDetailViewModelFactory(pk)).get(GlassesDetailViewModel.class);
 
         binding = ActivityGlassesDetailBinding.inflate(getLayoutInflater());
 

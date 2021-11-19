@@ -6,6 +6,7 @@ public class GlassesDetailModel {
     private String formName;
     private String frameName;
     private String cost;
+    private String avatar;
 
     public GlassesDetailModel() {
         name = "";
@@ -13,6 +14,7 @@ public class GlassesDetailModel {
         formName = "";
         frameName = "";
         cost = "";
+        avatar = "";
     }
 
     public String getName() {
@@ -53,5 +55,13 @@ public class GlassesDetailModel {
 
     public void setCost(String cost) {
         this.cost = cost;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 }

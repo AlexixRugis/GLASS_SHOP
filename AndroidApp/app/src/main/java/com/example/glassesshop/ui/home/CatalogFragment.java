@@ -17,6 +17,7 @@ import com.example.glassesshop.R;
 import com.example.glassesshop.databinding.CatalogGlassesModelBinding;
 import com.example.glassesshop.databinding.FragmentCatalogBinding;
 import com.example.glassesshop.ui.DataBindingListAdapter;
+import com.example.glassesshop.utils.interfaces.IDetailTransitor;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class CatalogFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         CatalogViewModel catalogViewModel = new ViewModelProvider(this).get(CatalogViewModel.class);
+        catalogViewModel.setDetailTransitor((IDetailTransitor)getActivity());
 
         binding = FragmentCatalogBinding.inflate(inflater, container, false);
         View root = binding.getRoot();

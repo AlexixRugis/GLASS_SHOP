@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.glassesshop.ui.GlassesDetailActivity;
+import com.example.glassesshop.utils.interfaces.IDetailTransitor;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,7 +15,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.glassesshop.databinding.ActivityMainBinding;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements IDetailTransitor {
 
     private ActivityMainBinding binding;
 
@@ -44,4 +45,8 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    @Override
+    public void TransitTo(int pk) {
+        GotoDetails(pk);
+    }
 }

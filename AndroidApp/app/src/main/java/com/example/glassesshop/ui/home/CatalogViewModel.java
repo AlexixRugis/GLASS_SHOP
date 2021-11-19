@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.glassesshop.api.HttpUtils;
 import com.example.glassesshop.api.glasses.GlassesApiUtils;
 import com.example.glassesshop.api.glasses.IGlasseslist;
+import com.example.glassesshop.utils.interfaces.IDetailTransitor;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -23,6 +24,7 @@ import cz.msebera.android.httpclient.Header;
 public class CatalogViewModel extends ViewModel {
 
     private final MutableLiveData<ArrayList<GlassesModel>> glassesData;
+    private IDetailTransitor detailTransitor;
 
     public CatalogViewModel() {
         glassesData = new MutableLiveData<>();
@@ -40,6 +42,10 @@ public class CatalogViewModel extends ViewModel {
 
     public void ShowDetails(int index) {
         GlassesModel model = glassesData.getValue().get(index);
-        Log.d("", String.valueOf(model.getPk()));
+        detailTransitor.TransitTo(model.getPk());
+    }
+
+    public void setDetailTransitor(IDetailTransitor detailTransitor) {
+        this.detailTransitor = detailTransitor;
     }
 }
