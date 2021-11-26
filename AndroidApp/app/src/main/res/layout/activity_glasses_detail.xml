@@ -4,6 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
         <variable name="glasses" type="com.example.glassesshop.ui.home.GlassesDetailModel"/>
+        <variable name="vm" type="com.example.glassesshop.ui.GlassesDetailViewModel"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -52,14 +53,28 @@
 
         <TextView
             android:id="@+id/glasses_description"
-            android:layout_width="394dp"
-            android:layout_height="111dp"
+            android:layout_width="392dp"
+            android:layout_height="76dp"
             android:text="@{glasses.getDescription()}"
             android:textColor="#000000"
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.473"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/glasses_cost" />
+            app:layout_constraintTop_toBottomOf="@+id/glasses_cost"
+            app:layout_constraintVertical_bias="0.235" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="335dp"
+            android:layout_height="60dp"
+            android:text="Try it in AR"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/glasses_description"
+            app:layout_constraintVertical_bias="0.709"
+            android:onClick="@{() -> vm.GotoAR()}"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

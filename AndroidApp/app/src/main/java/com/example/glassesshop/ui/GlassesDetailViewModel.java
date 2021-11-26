@@ -13,14 +13,16 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.glassesshop.api.glasses.GlassesApiUtils;
 import com.example.glassesshop.api.glasses.IGlassesDetail;
 import com.example.glassesshop.ui.home.GlassesDetailModel;
+import com.example.glassesshop.utils.interfaces.IPKTransitor;
 
 public class GlassesDetailViewModel extends ViewModel {
     private int pk;
     private final MutableLiveData<GlassesDetailModel> glassesData;
+    private final IPKTransitor arTransitor;
 
-    public GlassesDetailViewModel(int pk) {
-        Log.d("", String.valueOf(pk));
+    public GlassesDetailViewModel(int pk, IPKTransitor arTransitor) {
         this.pk = pk;
+        this.arTransitor = arTransitor;
         glassesData = new MutableLiveData<>();
 
         if (pk != -1) {
@@ -47,5 +49,10 @@ public class GlassesDetailViewModel extends ViewModel {
         Glide.with(view.getContext())
                 .load(imageUrl).apply(new RequestOptions().centerCrop())
                 .into(view);
+    }
+
+    public void GotoAR() {
+        Log.d("DEBUG", String.valueOf(pk));
+        arTransitor.TransitTo(pk);
     }
 }

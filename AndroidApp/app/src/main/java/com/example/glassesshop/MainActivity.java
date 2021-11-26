@@ -2,9 +2,10 @@ package com.example.glassesshop;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.glassesshop.ui.GlassesDetailActivity;
-import com.example.glassesshop.utils.interfaces.IDetailTransitor;
+import com.example.glassesshop.utils.interfaces.IPKTransitor;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,13 +16,25 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.glassesshop.databinding.ActivityMainBinding;
 
-public class MainActivity extends AppCompatActivity implements IDetailTransitor {
+import org.opencv.android.OpenCVLoader;
+
+public class MainActivity extends AppCompatActivity implements IPKTransitor {
 
     private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(OpenCVLoader.initDebug()){
+
+            Log.d("Check","OpenCv configured successfully");
+
+        } else{
+
+            Log.d("Check","OpenCv doesn’t configured successfully");
+
+        }
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

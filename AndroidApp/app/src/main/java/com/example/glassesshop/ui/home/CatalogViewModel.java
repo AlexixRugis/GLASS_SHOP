@@ -1,30 +1,19 @@
 package com.example.glassesshop.ui.home;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.example.glassesshop.api.HttpUtils;
 import com.example.glassesshop.api.glasses.GlassesApiUtils;
 import com.example.glassesshop.api.glasses.IGlasseslist;
-import com.example.glassesshop.utils.interfaces.IDetailTransitor;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.example.glassesshop.utils.interfaces.IPKTransitor;
 
 import java.util.ArrayList;
-
-import cz.msebera.android.httpclient.Header;
 
 public class CatalogViewModel extends ViewModel {
 
     private final MutableLiveData<ArrayList<GlassesModel>> glassesData;
-    private IDetailTransitor detailTransitor;
+    private IPKTransitor detailTransitor;
 
     public CatalogViewModel() {
         glassesData = new MutableLiveData<>();
@@ -45,7 +34,7 @@ public class CatalogViewModel extends ViewModel {
         detailTransitor.TransitTo(model.getPk());
     }
 
-    public void setDetailTransitor(IDetailTransitor detailTransitor) {
+    public void setDetailTransitor(IPKTransitor detailTransitor) {
         this.detailTransitor = detailTransitor;
     }
 }
