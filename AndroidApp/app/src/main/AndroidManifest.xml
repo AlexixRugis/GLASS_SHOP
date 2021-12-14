@@ -39,6 +39,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data android:name="cameraFacingFront" android:value="True"/>
+        <meta-data android:name="binaryGraphName" android:value="face_effect_gpu.binarypb"/>
+        <meta-data android:name="inputVideoStreamName" android:value="input_video"/>
+        <meta-data android:name="outputVideoStreamName" android:value="output_video"/>
+        <meta-data android:name="flipFramesVertically" android:value="True"/>
+        <meta-data android:name="converterNumBuffers" android:value="2"/>
     </application>
 
 </manifest>

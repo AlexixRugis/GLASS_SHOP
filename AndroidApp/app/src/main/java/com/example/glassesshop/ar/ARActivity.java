@@ -1,12 +1,27 @@
 package com.example.glassesshop.ar;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Size;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.glassesshop.R;
+import com.google.mediapipe.components.CameraHelper;
+import com.google.mediapipe.components.CameraXPreviewHelper;
+import com.google.mediapipe.components.ExternalTextureConverter;
+import com.google.mediapipe.components.FrameProcessor;
+import com.google.mediapipe.components.PermissionHelper;
+import com.google.mediapipe.framework.AndroidAssetUtil;
+import com.google.mediapipe.glutil.EglManager;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -26,134 +41,195 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ARActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+public class ARActivity extends AppCompatActivity {
+    private static final String TAG = "ARActivity";
 
-    // distance from camera to object(face) measured
-    private final double KNOWN_DISTANCE = 76.2;  // centimeter
-    // width of face in the real world or Object Plane
-    private final double KNOWN_WIDTH = 14.3;  // centimeter
-    private final double FOCAL_LENGTH = 1000;
+    // Flips the camera-preview frames vertically by default, before sending them into FrameProcessor
+    // to be processed in a MediaPipe graph, and flips the processed frames back when they are
+    // displayed. This maybe needed because OpenGL represents images assuming the image origin is at
+    // the bottom-left corner, whereas MediaPipe in general assumes the image origin is at the
+    // top-left corner.
+    // NOTE: use "flipFramesVertically" in manifest metadata to override this behavior.
+    private static final boolean FLIP_FRAMES_VERTICALLY = true;
 
+    // Number of output frames allocated in ExternalTextureConverter.
+    // NOTE: use "converterNumBuffers" in manifest metadata to override number of buffers. For
+    // example, when there is a FlowLimiterCalculator in the graph, number of buffers should be at
+    // least `max_in_flight + max_in_queue + 1` (where max_in_flight and max_in_queue are used in
+    // FlowLimiterCalculator options). That's because we need buffers for all the frames that are in
+    // flight/queue plus one for the next frame from the camera.
+    private static final int NUM_BUFFERS = 2;
 
-    private JavaCameraView javaCameraView;
-    private File cascFile;
-    private CascadeClassifier faceDetector;
-    private Mat mRgba, mGrey;
+    static {
+        // Load all native libraries needed by the app.
+        System.loadLibrary("mediapipe_jni");
+        try {
+            System.loadLibrary("opencv_java3");
+        } catch (java.lang.UnsatisfiedLinkError e) {
+            // Some example apps (e.g. template matching) require OpenCV 4.
+            System.loadLibrary("opencv_java4");
+        }
+    }
+
+    // Sends camera-preview frames into a MediaPipe graph for processing, and displays the processed
+    // frames onto a {@link Surface}.
+    protected FrameProcessor processor;
+    // Handles camera access via the {@link CameraX} Jetpack support library.
+    protected CameraXPreviewHelper cameraHelper;
+
+    // {@link SurfaceTexture} where the camera-preview frames can be accessed.
+    private SurfaceTexture previewFrameTexture;
+    // {@link SurfaceView} that displays the camera-preview frames processed by a MediaPipe graph.
+    private SurfaceView previewDisplayView;
+
+    // Creates and manages an {@link EGLContext}.
+    private EglManager eglManager;
+    // Converts the GL_TEXTURE_EXTERNAL_OES texture from Android camera into a regular texture to be
+    // consumed by {@link FrameProcessor} and the underlying MediaPipe graph.
+    private ExternalTextureConverter converter;
+
+    // ApplicationInfo for retrieving metadata defined in the manifest.
+    private ApplicationInfo applicationInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(getContentViewLayoutResId());
 
-        setContentView(R.layout.activity_aractivity);
-
-        javaCameraView = (JavaCameraView)findViewById(R.id.view);
-
-        if (!OpenCVLoader.initDebug()) {
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, baseLoaderCallback);
-        }
-        else {
-            baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        try {
+            applicationInfo =
+                    getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Cannot find application info: " + e);
         }
 
-        javaCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
-        javaCameraView.setCvCameraViewListener(this);
+        previewDisplayView = new SurfaceView(this);
+        setupPreviewDisplayView();
+
+        // Initialize asset manager so that MediaPipe native libraries can access the app assets, e.g.,
+        // binary graphs.
+        AndroidAssetUtil.initializeNativeAssetManager(this);
+        eglManager = new EglManager(null);
+        processor =
+                new FrameProcessor(
+                        this,
+                        eglManager.getNativeContext(),
+                        applicationInfo.metaData.getString("binaryGraphName"),
+                        applicationInfo.metaData.getString("inputVideoStreamName"),
+                        applicationInfo.metaData.getString("outputVideoStreamName"));
+        processor
+                .getVideoSurfaceOutput()
+                .setFlipY(
+                        applicationInfo.metaData.getBoolean("flipFramesVertically", FLIP_FRAMES_VERTICALLY));
+
+        PermissionHelper.checkAndRequestCameraPermissions(this);
+    }
+
+    // Used to obtain the content view for this application. If you are extending this class, and
+    // have a custom layout, override this method and return the custom layout.
+    protected int getContentViewLayoutResId() {
+        return R.layout.activity_aractivity;
     }
 
     @Override
-    public void onCameraViewStarted(int width, int height) {
-        mRgba = new Mat();
-        mGrey = new Mat();
+    protected void onResume() {
+        super.onResume();
+        converter =
+                new ExternalTextureConverter(
+                        eglManager.getContext(),
+                        applicationInfo.metaData.getInt("converterNumBuffers", NUM_BUFFERS));
+        converter.setFlipY(
+                applicationInfo.metaData.getBoolean("flipFramesVertically", FLIP_FRAMES_VERTICALLY));
+        converter.setConsumer(processor);
+        if (PermissionHelper.cameraPermissionsGranted(this)) {
+            startCamera();
+        }
     }
 
     @Override
-    public void onCameraViewStopped() {
-        mRgba.release();
-        mGrey.release();
+    protected void onPause() {
+        super.onPause();
+        converter.close();
+
+        // Hide preview display until we re-open the camera again.
+        previewDisplayView.setVisibility(View.GONE);
     }
 
     @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Imgproc.cvtColor(inputFrame.rgba(), mRgba, Imgproc.COLOR_BGR2RGB);
-
-        double faceWidth = getFaceWidth(mRgba);
-
-        if (faceWidth != 0)
-        {
-
-            double distance = getDistance(FOCAL_LENGTH, KNOWN_WIDTH, faceWidth);
-
-            Imgproc.putText(mRgba, "D: " + String.valueOf(Math.round(distance)),
-                    new Point(50, 50), 3, 1, new Scalar(255, 0, 0, 255), 2);
-        }
-
-        return mRgba;
+    public void onRequestPermissionsResult(
+            int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        PermissionHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    private BaseLoaderCallback baseLoaderCallback = new BaseLoaderCallback(this) {
-        @Override
-        public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS: {
-                    try{
-                        InputStream is = getResources().openRawResource(R.raw.haarcascade_frontalcatface);
-                        File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-                        cascFile = new File(cascadeDir, "haarcascade_frontalface.xml");
-                        FileOutputStream os = new FileOutputStream(cascFile);
-
-                        byte[] buffer = new byte[4096];
-                        int bytesRead;
-                        while ((bytesRead = is.read(buffer)) != -1) {
-                            os.write(buffer, 0, bytesRead);
-                        }
-                        is.close();
-                        os.close();
-
-                        faceDetector = new CascadeClassifier(cascFile.getAbsolutePath());
-
-                        if (faceDetector.empty()) {
-                            faceDetector = null;
-                        } else {
-                            cascadeDir.delete();
-                        }
-
-                        javaCameraView.enableView();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Log.e("err", "Failed to load cascade. Exception thrown: " + e);
-                    }
-                } break;
-
-                default:
-                    super.onManagerConnected(status);
-                    break;
-            }
-        }
-    };
-
-    private double getFocalLength(double measuredDistance, double realWidth, double widthInRfImage) {
-        double focalLengthValue = (widthInRfImage * measuredDistance) / realWidth;
-        return focalLengthValue;
+    protected void onCameraStarted(SurfaceTexture surfaceTexture) {
+        previewFrameTexture = surfaceTexture;
+        // Make the display view visible to start showing the preview. This triggers the
+        // SurfaceHolder.Callback added to (the holder of) previewDisplayView.
+        previewDisplayView.setVisibility(View.VISIBLE);
     }
 
-    private double getDistance(double focalLength, double realFaceWidth, double faceWidthInFrame) {
-        double distance = (realFaceWidth * focalLength) / faceWidthInFrame;
-        return distance;
+    protected Size cameraTargetResolution() {
+        return null; // No preference and let the camera (helper) decide.
     }
 
-    private double getFaceWidth(Mat imgGrey) {
-        double faceWidth = 0;
+    public void startCamera() {
+        cameraHelper = new CameraXPreviewHelper();
+        previewFrameTexture = converter.getSurfaceTexture();
+        cameraHelper.setOnCameraStartedListener(
+                surfaceTexture -> {
+                    onCameraStarted(surfaceTexture);
+                });
+        CameraHelper.CameraFacing cameraFacing =
+                applicationInfo.metaData.getBoolean("cameraFacingFront", false)
+                        ? CameraHelper.CameraFacing.FRONT
+                        : CameraHelper.CameraFacing.BACK;
+        cameraHelper.startCamera(
+                this, cameraFacing, previewFrameTexture, cameraTargetResolution());
+    }
 
-        MatOfRect faceDetections = new MatOfRect();
-        faceDetector.detectMultiScale(imgGrey, faceDetections, 1.3, 5);
+    protected Size computeViewSize(int width, int height) {
+        return new Size(width, height);
+    }
 
-        for (Rect rect : faceDetections.toArray()) {
-            Imgproc.rectangle(mRgba, new Point(rect.x, rect.y),
-                    new Point(rect.x + rect.width, rect.y + rect.height),
-                    new Scalar(255, 0, 0));
+    protected void onPreviewDisplaySurfaceChanged(
+            SurfaceHolder holder, int format, int width, int height) {
+        // (Re-)Compute the ideal size of the camera-preview display (the area that the
+        // camera-preview frames get rendered onto, potentially with scaling and rotation)
+        // based on the size of the SurfaceView that contains the display.
+        Size viewSize = computeViewSize(width, height);
+        Size displaySize = cameraHelper.computeDisplaySizeFromViewSize(viewSize);
+        boolean isCameraRotated = cameraHelper.isCameraRotated();
 
-            faceWidth = rect.width;
-        }
+        // Configure the output width and height as the computed display size.
+        converter.setDestinationSize(
+                isCameraRotated ? displaySize.getHeight() : displaySize.getWidth(),
+                isCameraRotated ? displaySize.getWidth() : displaySize.getHeight());
+    }
 
-        return faceWidth;
+    private void setupPreviewDisplayView() {
+        previewDisplayView.setVisibility(View.GONE);
+        ViewGroup viewGroup = findViewById(R.id.preview_display_layout);
+        viewGroup.addView(previewDisplayView);
+
+        previewDisplayView
+                .getHolder()
+                .addCallback(
+                        new SurfaceHolder.Callback() {
+                            @Override
+                            public void surfaceCreated(SurfaceHolder holder) {
+                                processor.getVideoSurfaceOutput().setSurface(holder.getSurface());
+                            }
+
+                            @Override
+                            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                                onPreviewDisplaySurfaceChanged(holder, format, width, height);
+                            }
+
+                            @Override
+                            public void surfaceDestroyed(SurfaceHolder holder) {
+                                processor.getVideoSurfaceOutput().setSurface(null);
+                            }
+                        });
     }
 }
