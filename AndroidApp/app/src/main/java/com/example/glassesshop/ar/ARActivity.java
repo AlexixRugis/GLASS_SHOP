@@ -21,6 +21,7 @@ import com.google.mediapipe.components.ExternalTextureConverter;
 import com.google.mediapipe.components.FrameProcessor;
 import com.google.mediapipe.components.PermissionHelper;
 import com.google.mediapipe.framework.AndroidAssetUtil;
+import com.google.mediapipe.framework.Packet;
 import com.google.mediapipe.glutil.EglManager;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -40,9 +41,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ARActivity extends AppCompatActivity {
     private static final String TAG = "ARActivity";
+
+    private static final String TEXTURE_PATH_PACKET_NAME = "texture_path";
+    private static final String MODEL_PATH_PACKET_NAME = "model_path";
 
     // Flips the camera-preview frames vertically by default, before sending them into FrameProcessor
     // to be processed in a MediaPipe graph, and flips the processed frames back when they are
@@ -103,12 +109,19 @@ public class ARActivity extends AppCompatActivity {
             Log.e(TAG, "Cannot find application info: " + e);
         }
 
+        try {
+            Log.d("FFFF", getCacheDir().getCanonicalPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         previewDisplayView = new SurfaceView(this);
         setupPreviewDisplayView();
 
         // Initialize asset manager so that MediaPipe native libraries can access the app assets, e.g.,
         // binary graphs.
         AndroidAssetUtil.initializeNativeAssetManager(this);
+
         eglManager = new EglManager(null);
         processor =
                 new FrameProcessor(
@@ -117,12 +130,14 @@ public class ARActivity extends AppCompatActivity {
                         applicationInfo.metaData.getString("binaryGraphName"),
                         applicationInfo.metaData.getString("inputVideoStreamName"),
                         applicationInfo.metaData.getString("outputVideoStreamName"));
+
         processor
                 .getVideoSurfaceOutput()
                 .setFlipY(
                         applicationInfo.metaData.getBoolean("flipFramesVertically", FLIP_FRAMES_VERTICALLY));
 
         PermissionHelper.checkAndRequestCameraPermissions(this);
+        PermissionHelper.checkAndRequestReadExternalStoragePermissions(this);
     }
 
     // Used to obtain the content view for this application. If you are extending this class, and
