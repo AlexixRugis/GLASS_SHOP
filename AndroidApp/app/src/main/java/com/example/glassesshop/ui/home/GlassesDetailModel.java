@@ -7,6 +7,7 @@ public class GlassesDetailModel {
     private String frameName;
     private String cost;
     private String avatar;
+    private String modelUrl;
 
     public GlassesDetailModel() {
         name = "";
@@ -63,5 +64,13 @@ public class GlassesDetailModel {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public String getModelUrl() {
+        return modelUrl;
+    }
+
+    public void setModelUrl(String modelUrl) {
+        this.modelUrl = modelUrl;
     }
 }

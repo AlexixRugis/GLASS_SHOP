@@ -86,6 +86,7 @@ public class GlassesApiUtils {
                     detailModel.setFrameName(((JSONObject)response.get("frame")).getString("name"));
 
                     if (!response.isNull("avatar")) detailModel.setAvatar(response.getString("avatar"));
+                    if (!response.isNull("model_file")) detailModel.setModelUrl(response.getString("model_file"));
 
                     glassesDetailHandler.onGetGlassesDetail(detailModel);
                 } catch (JSONException e) {

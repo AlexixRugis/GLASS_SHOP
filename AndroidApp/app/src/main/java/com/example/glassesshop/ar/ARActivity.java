@@ -1,9 +1,11 @@
 package com.example.glassesshop.ar;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
@@ -13,8 +15,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.glassesshop.R;
+import com.example.glassesshop.api.DownloadFileFromURL;
 import com.google.mediapipe.components.CameraHelper;
 import com.google.mediapipe.components.CameraXPreviewHelper;
 import com.google.mediapipe.components.ExternalTextureConverter;
@@ -45,26 +50,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ARActivity extends AppCompatActivity {
+
+    public static final String MODEL_URL_PARAM_NAME = "model_url";
+    public static final String TEXTURE_URL_PARAM_NAME = "texture_url";
+
     private static final String TAG = "ARActivity";
-
-    private static final String TEXTURE_PATH_PACKET_NAME = "texture_path";
-    private static final String MODEL_PATH_PACKET_NAME = "model_path";
-
-    // Flips the camera-preview frames vertically by default, before sending them into FrameProcessor
-    // to be processed in a MediaPipe graph, and flips the processed frames back when they are
-    // displayed. This maybe needed because OpenGL represents images assuming the image origin is at
-    // the bottom-left corner, whereas MediaPipe in general assumes the image origin is at the
-    // top-left corner.
-    // NOTE: use "flipFramesVertically" in manifest metadata to override this behavior.
     private static final boolean FLIP_FRAMES_VERTICALLY = true;
-
-    // Number of output frames allocated in ExternalTextureConverter.
-    // NOTE: use "converterNumBuffers" in manifest metadata to override number of buffers. For
-    // example, when there is a FlowLimiterCalculator in the graph, number of buffers should be at
-    // least `max_in_flight + max_in_queue + 1` (where max_in_flight and max_in_queue are used in
-    // FlowLimiterCalculator options). That's because we need buffers for all the frames that are in
-    // flight/queue plus one for the next frame from the camera.
     private static final int NUM_BUFFERS = 2;
+    private static final int REQUEST_WRITE_STORAGE_REQUEST_CODE = 0;
 
     static {
         // Load all native libraries needed by the app.
@@ -77,30 +70,57 @@ public class ARActivity extends AppCompatActivity {
         }
     }
 
-    // Sends camera-preview frames into a MediaPipe graph for processing, and displays the processed
-    // frames onto a {@link Surface}.
     protected FrameProcessor processor;
-    // Handles camera access via the {@link CameraX} Jetpack support library.
     protected CameraXPreviewHelper cameraHelper;
 
-    // {@link SurfaceTexture} where the camera-preview frames can be accessed.
     private SurfaceTexture previewFrameTexture;
-    // {@link SurfaceView} that displays the camera-preview frames processed by a MediaPipe graph.
     private SurfaceView previewDisplayView;
 
-    // Creates and manages an {@link EGLContext}.
     private EglManager eglManager;
-    // Converts the GL_TEXTURE_EXTERNAL_OES texture from Android camera into a regular texture to be
-    // consumed by {@link FrameProcessor} and the underlying MediaPipe graph.
+
     private ExternalTextureConverter converter;
 
-    // ApplicationInfo for retrieving metadata defined in the manifest.
     private ApplicationInfo applicationInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getContentViewLayoutResId());
+
+        String model_url = getIntent().getStringExtra(MODEL_URL_PARAM_NAME);
+        if (model_url == null) finish();
+
+        PermissionHelper.checkAndRequestCameraPermissions(this);
+        PermissionHelper.checkAndRequestReadExternalStoragePermissions(this);
+        requestAppPermissions();
+
+        initialize();
+
+        /*new DownloadFileFromURL((s) -> {
+        }).execute(model_url, "/storage/emulated/0/GLASSES_SHOP/cache/glasses1.binarypb");*/
+    }
+
+    private void requestAppPermissions() {
+        if (hasReadPermissions() && hasWritePermissions()) {
+            return;
+        }
+
+        ActivityCompat.requestPermissions(this,
+                new String[] {
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, REQUEST_WRITE_STORAGE_REQUEST_CODE); // your request code
+    }
+
+    private boolean hasReadPermissions() {
+        return (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private boolean hasWritePermissions() {
+        return (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void initialize() {
 
         try {
             applicationInfo =
@@ -117,12 +137,12 @@ public class ARActivity extends AppCompatActivity {
 
         previewDisplayView = new SurfaceView(this);
         setupPreviewDisplayView();
+        eglManager = new EglManager(null);
 
-        // Initialize asset manager so that MediaPipe native libraries can access the app assets, e.g.,
-        // binary graphs.
         AndroidAssetUtil.initializeNativeAssetManager(this);
 
-        eglManager = new EglManager(null);
+
+
         processor =
                 new FrameProcessor(
                         this,
@@ -135,9 +155,6 @@ public class ARActivity extends AppCompatActivity {
                 .getVideoSurfaceOutput()
                 .setFlipY(
                         applicationInfo.metaData.getBoolean("flipFramesVertically", FLIP_FRAMES_VERTICALLY));
-
-        PermissionHelper.checkAndRequestCameraPermissions(this);
-        PermissionHelper.checkAndRequestReadExternalStoragePermissions(this);
     }
 
     // Used to obtain the content view for this application. If you are extending this class, and
