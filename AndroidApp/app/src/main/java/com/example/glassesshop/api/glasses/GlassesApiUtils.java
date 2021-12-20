@@ -87,6 +87,7 @@ public class GlassesApiUtils {
 
                     if (!response.isNull("avatar")) detailModel.setAvatar(response.getString("avatar"));
                     if (!response.isNull("model_file")) detailModel.setModelUrl(response.getString("model_file"));
+                    if (!response.isNull("texture_file")) detailModel.setTextureUrl(response.getString("texture_file"));
 
                     glassesDetailHandler.onGetGlassesDetail(detailModel);
                 } catch (JSONException e) {

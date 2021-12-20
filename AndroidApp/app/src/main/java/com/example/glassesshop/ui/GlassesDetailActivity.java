@@ -36,9 +36,10 @@ public class GlassesDetailActivity extends AppCompatActivity implements IPKTrans
     }
 
     private void GotoARWear() {
-        Intent intent = new Intent(this, ARActivity.class);
+        Intent intent = new Intent(this, ModelLoadingActivity.class);
 
-        intent.putExtra(ARActivity.MODEL_URL_PARAM_NAME, viewModel.getGlassesData().getValue().getModelUrl());
+        intent.putExtra(ModelLoadingActivity.MODEL_URL_PARAM_NAME, viewModel.getGlassesData().getValue().getModelUrl());
+        intent.putExtra(ModelLoadingActivity.TEXTURE_URL_PARAM_NAME, viewModel.getGlassesData().getValue().getTextureUrl());
 
         startActivity(intent);
     }

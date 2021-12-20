@@ -4,16 +4,22 @@
     package="com.example.glassesshop">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-    <uses-permission android:name="android.permission.CAMERA"/>
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-
-    <uses-feature android:name="android.hardware.camera" android:required="false"/>
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
-    <uses-feature android:name="android.hardware.camera.front" android:required="false"/>
-    <uses-feature android:name="android.hardware.camera.front.autofocus" android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.front"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.front.autofocus"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -25,13 +31,20 @@
         android:theme="@style/Theme.GlassesShop"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.ModelLoadingActivity"
+            android:exported="true"
+            android:label="@string/title_activity_model_loading"
+            android:theme="@style/Theme.GlassesShop.NoActionBar" />
+        <activity
             android:name=".ar.ARActivity"
             android:exported="true"
             android:label="@string/title_activity_aractivity"
             android:theme="@style/Theme.GlassesShop.NoActionBar" />
         <activity
             android:name=".ui.GlassesDetailActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:label="@string/title_activity_glasses_detail_activity"
+            android:theme="@style/Theme.GlassesShop.NoActionBar" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -43,12 +56,24 @@
             </intent-filter>
         </activity>
 
-        <meta-data android:name="cameraFacingFront" android:value="True"/>
-        <meta-data android:name="binaryGraphName" android:value="face_effect_gpu.binarypb"/>
-        <meta-data android:name="inputVideoStreamName" android:value="input_video"/>
-        <meta-data android:name="outputVideoStreamName" android:value="output_video"/>
-        <meta-data android:name="flipFramesVertically" android:value="True"/>
-        <meta-data android:name="converterNumBuffers" android:value="2"/>
+        <meta-data
+            android:name="cameraFacingFront"
+            android:value="True" />
+        <meta-data
+            android:name="binaryGraphName"
+            android:value="face_effect_gpu.binarypb" />
+        <meta-data
+            android:name="inputVideoStreamName"
+            android:value="input_video" />
+        <meta-data
+            android:name="outputVideoStreamName"
+            android:value="output_video" />
+        <meta-data
+            android:name="flipFramesVertically"
+            android:value="True" />
+        <meta-data
+            android:name="converterNumBuffers"
+            android:value="2" />
     </application>
 
 </manifest>

@@ -51,8 +51,7 @@ import java.util.Map;
 
 public class ARActivity extends AppCompatActivity {
 
-    public static final String MODEL_URL_PARAM_NAME = "model_url";
-    public static final String TEXTURE_URL_PARAM_NAME = "texture_url";
+
 
     private static final String TAG = "ARActivity";
     private static final boolean FLIP_FRAMES_VERTICALLY = true;
@@ -87,17 +86,13 @@ public class ARActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(getContentViewLayoutResId());
 
-        String model_url = getIntent().getStringExtra(MODEL_URL_PARAM_NAME);
-        if (model_url == null) finish();
-
         PermissionHelper.checkAndRequestCameraPermissions(this);
         PermissionHelper.checkAndRequestReadExternalStoragePermissions(this);
         requestAppPermissions();
 
         initialize();
 
-        /*new DownloadFileFromURL((s) -> {
-        }).execute(model_url, "/storage/emulated/0/GLASSES_SHOP/cache/glasses1.binarypb");*/
+
     }
 
     private void requestAppPermissions() {

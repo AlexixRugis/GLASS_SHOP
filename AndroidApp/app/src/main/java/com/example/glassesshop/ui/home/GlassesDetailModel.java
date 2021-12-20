@@ -8,6 +8,7 @@ public class GlassesDetailModel {
     private String cost;
     private String avatar;
     private String modelUrl;
+    private String textureUrl;
 
     public GlassesDetailModel() {
         name = "";
@@ -72,5 +73,17 @@ public class GlassesDetailModel {
 
     public void setModelUrl(String modelUrl) {
         this.modelUrl = modelUrl;
+    }
+
+    public String getTextureUrl() {
+        return textureUrl;
+    }
+
+    public void setTextureUrl(String textureUrl) {
+        this.textureUrl = textureUrl;
+    }
+
+    public boolean isVisible() {
+        return this.modelUrl != null && this.textureUrl != null;
     }
 }

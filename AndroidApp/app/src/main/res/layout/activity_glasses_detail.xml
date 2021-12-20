@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
+        <import type="android.view.View"/>
         <variable name="glasses" type="com.example.glassesshop.ui.home.GlassesDetailModel"/>
         <variable name="vm" type="com.example.glassesshop.ui.GlassesDetailViewModel"/>
     </data>
@@ -10,71 +11,85 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingHorizontal="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:lineSpacingExtra="10dp"
         tools:context=".ui.GlassesDetailActivity">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginVertical="10dp">
+
+            <TextView
+                android:id="@+id/glasses_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{glasses.getName()}"
+                android:textColor="#000000"
+                android:textSize="30sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/glasses_cost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{glasses.getCost()}"
+                android:textColor="#000000"
+                android:textSize="24sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
         <ImageView
             android:id="@+id/preview_image"
-            android:layout_width="378dp"
-            android:layout_height="290dp"
-            app:layout_constraintBottom_toTopOf="@+id/glasses_name"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/glasses_name"
+            app:loadImage="@{glasses.avatar}"
             tools:ignore="ImageContrastCheck,ImageContrastCheck"
-            tools:srcCompat="@tools:sample/avatars"
-            app:loadImage="@{glasses.avatar}"/>
+            tools:srcCompat="@tools:sample/avatars" />
 
-        <TextView
-            android:id="@+id/glasses_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@{glasses.getName()}"
-            android:textColor="#000000"
-            android:textSize="48sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.87"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/glasses_cost"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="76dp"
-            android:text="@{glasses.getCost()}"
-            android:textColor="#000000"
-            android:textSize="34sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.206"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/glasses_name" />
 
         <TextView
             android:id="@+id/glasses_description"
-            android:layout_width="392dp"
-            android:layout_height="76dp"
+            android:layout_width="fill_parent"
+            android:layout_marginVertical="10dp"
+            android:layout_height="wrap_content"
             android:text="@{glasses.getDescription()}"
             android:textColor="#000000"
-            android:textSize="24sp"
+            android:textSize="20sp"
+            android:textAlignment="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.473"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/glasses_cost"
-            app:layout_constraintVertical_bias="0.235" />
+            app:layout_constraintTop_toBottomOf="@+id/glasses_cost"/>
 
-        <Button
-            android:id="@+id/button"
-            android:layout_width="335dp"
-            android:layout_height="60dp"
-            android:text="Try it in AR"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/glasses_description"
-            app:layout_constraintVertical_bias="0.709"
-            android:onClick="@{() -> vm.GotoAR()}"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/button"
+        android:visibility="@{glasses.visible ? View.VISIBLE : View.INVISIBLE}"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="@string/wear_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:onClick="@{() -> vm.GotoAR()}"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

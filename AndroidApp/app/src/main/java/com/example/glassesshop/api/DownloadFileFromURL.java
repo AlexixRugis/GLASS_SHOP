@@ -16,6 +16,7 @@ public class DownloadFileFromURL extends AsyncTask<String, String, String> {
 
     public interface ISaveCallback {
         void onSave(Boolean success);
+        void onProgress(int percents);
     }
 
     private final ISaveCallback callback;
@@ -67,7 +68,7 @@ public class DownloadFileFromURL extends AsyncTask<String, String, String> {
 
     @Override
     protected void onProgressUpdate(String... progress) {
-        Log.d("SAVER", progress[0]);
+        callback.onProgress(Integer.parseInt(progress[0]));
     }
 
     @Override

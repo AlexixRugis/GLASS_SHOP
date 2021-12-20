@@ -25,6 +25,7 @@ class GlassesModel(models.Model):
 
     avatar = models.ImageField(null=True, blank=True)
     model_file = models.FileField(upload_to ='3d/', null=True, blank=True)
+    texture_file = models.FileField(upload_to='textures/', null=True, blank=True)
 
     form = models.ForeignKey(GlassesForm, null=True, related_name="glasses", on_delete=models.SET_NULL)
     frame = models.ForeignKey(GlassesFrame, null=True, related_name="glasses", on_delete=models.SET_NULL)
